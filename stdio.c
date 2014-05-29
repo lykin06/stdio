@@ -15,11 +15,11 @@ struct _IOB[100] =
 void alloc_buf(FILE * f) {
 	if( (f->_base = malloc(BUFSIZ)) ) {
 		// On a un buffer
-		f->_flag = _IOFBF;
+		f->_flag |= _IOFBF;
 		f->_bufsiz = BUFSIZ;
 	} else {
 		// On n'a pas de buffer
-		f->_flag = _IONBF;
+		f->_flag |= _IONBF;
 	}
 
 	// On fait poiter le premier element sur la base
@@ -33,9 +33,9 @@ void alloc_buf(FILE * f) {
  * Libere le buffer
  */
  void free_buf(FILE * f) {
- 	if (f->_flag == _IOFBF) {
+ 	if (f->_flag & _IOFBF) {
  		free(f->_base);
- 		f->_flag = _IONBF;
+ 		f->_flag |= _IONBF;
  		f->_bufsiz = 0;
  		f->_cnt = 0;
  	}
@@ -50,13 +50,13 @@ void alloc_buf(FILE * f) {
  */
 int _filbuf(FILE * f) {
 	// Fichier ouvert en ecriture
-	if (f->_flag == _IOWRT) {
-		f->_flag = _IOERR;
+	if (f->_flag & _IOWRT) {
+		f->_flag |= _IOERR;
 		return EOF;
 	}
 
 	// Aucun buffer aloue
-	if (f->_flag == _IONBF) {
+	if (f->_flag & _IONBF) {
 		alloc_buf(f);
 	} else {
 		// Sinon on place le caractere courant sur la base
@@ -67,7 +67,7 @@ int _filbuf(FILE * f) {
 
 	if(f->_cnt <= 0) {
 		// Soit on a une erreure de lecture, soit on est en fin de fichier
-		f->_flag = f->_cnt ? _IOERR : _IOEOF;
+		f->_flag |= f->_cnt ? _IOERR : _IOEOF;
 		return EOF;
 	}
 
