@@ -16,12 +16,12 @@
 #define	BUFSIZ	1024
 #define _SBFSIZ	8
 extern	struct	_iobuf {
-	int		_cnt; 			// nbr de caracteres dans le buffeur
-	unsigned char*  _ptr;	// caractere courant
-	unsigned char*  _base;	// adresse du debut du buffeur
-	int		_bufsiz;		// taille du buffeur
-	short		_flag;
-	char		_file;		// fichier
+	int				_cnt; 			// nbr de caracteres dans le buffeur
+	unsigned char*  _ptr;			// caractere courant
+	unsigned char*  _base;			// adresse du debut du buffeur
+	int				_bufsiz;		// taille du buffeur
+	short			_flag;
+	char			_file;			// fichier
 } _IOB[];
 
 // Flags en octal
@@ -30,8 +30,8 @@ extern	struct	_iobuf {
 #define	_IOWRT	 02
 #define	_IONBF	 04					// Non bufferise
 #define	_IOMYBUF 010
-#define	_IOEOF	 020
-#define	_IOERR	 040
+#define	_IOEOF	 020 				// Fin de fichier
+#define	_IOERR	 040 				// Erreur
 #define	_IOSTRG	 0100				// Non utilise
 #define	_IOLBF	 0200				// bufferisation par ligne
 #define	_IORW	 0400
@@ -51,12 +51,6 @@ extern int _filbuf(FILE * f);
 extern int putc();
 extern int getc();
 #else
-/*
-expliquer filbuf
-ressemble a: read(p->file, p->base, p->bufsize)
-qui alloue la base ?
-fichier en mode lecture ?
-*/
 #define	getc(p)		(--(p)->_cnt>=0? ((int)*(p)->_ptr++):_filbuf(p))
 #define putc(x, p)	(--(p)->_cnt >= 0 ?\
 	(int)(*(p)->_ptr++ = (unsigned char)(x)) :\
