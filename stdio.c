@@ -1,6 +1,9 @@
 #include "stdio.h"
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 struct _IOB[100] =
 {
@@ -78,12 +81,12 @@ int _filbuf(FILE * f) {
 }
 
 /*
- * Ecriture du caractere courant du buffer dans le fichier.
+ * Ecriture d'un caractere dans le fichier.
  * Retourne le caractere en hexa en cas de succes
  * Retourne -1 en cas d'echec
  */
  int _flsbuf(unsigned char c, FILE *f) {
- 	// Compteur de cractere dans le buffer
+ 	// Compteur de caractere dans le buffer
  	int count;
 
  	// Compteur de caractere ecrit
@@ -155,5 +158,51 @@ int _filbuf(FILE * f) {
 
  	// On retourne le caractere ecrit en hexadecimale
  	return c & 0xff;
+ }
+
+ FILE *fopen(const char *filename, const char *mode) {
+ 	int fflag;
+ 	int oflag;
+ 	char file;
+
+ 	FILE *f = malloc(sizeof(FILE));
+
+ 	
+ 	// echec du malloc
+ 	if(!f) {
+ 		return NULL;
+ 	}
+
+ 	switch (*mode) {
+ 		case 'r':
+ 			fflag = _IOREAD;
+ 			oflag = O_RDONLY;
+ 			break;
+ 		case 'w':
+ 			fflag = _IOWRT;
+ 			oflag = O_WRONLY | O_CREAT | O_TRUNC;
+ 			break;
+ 		case 'a':
+ 			fflag = _IOWRT;
+ 			oflag = O_WRONLY | O_CREAT | O_APPEND;
+ 			break;
+ 		// Erreur on libere le malloc et on quitte
+ 		default:
+ 			free(f);
+ 			return NULL;
+ 	}
+
+ 	// Ouverture du fichier
+ 	if ((file = open(filename, oflag)) < 0) {
+		free(f);
+		return NULL;
+	}
+
+	f->_flag = fflag;
+	f->_cnt = 0;
+	f->_base = f->_ptr = NULL;
+	f->_file = file;
+
+ 	return f;
  }
 
