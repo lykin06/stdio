@@ -213,7 +213,7 @@ void setbuf(FILE *stream, char *buf) {
 		free_buf(stream);
 	}
 
-	if( (stream->_base = malloc(sizeof(size))) ) {
+	if( (stream->_base = malloc(size)) ) {
 		// On a un buffer
 		stream->_flag |= _IOFBF;
 		stream->_bufsiz = size;
@@ -221,9 +221,32 @@ void setbuf(FILE *stream, char *buf) {
 		// On n'a pas de buffer
 		stream->_flag |= _IONBF;
 	}
-	
+
 	stream->_base = stream->_ptr = buf;
 
 	// On indique que l'on est au debut du buffer
 	stream->_cnt = 0;
+}
+
+int setvbuf(FILE *stream, char *buf, int mode, int size) {;
+	if (stream->_flag & _IOFBF) {
+		free_buf(stream);
+	}
+
+	if( (stream->_base = malloc(size)) ) {
+		// On a un buffer
+		stream->_bufsiz = size;
+	} else {
+		// On n'a pas de buffer
+		stream->_flag |= _IONBF;
+		return -1;
+	}
+
+	stream->_flag = mode;
+	stream->_base = stream->_ptr = buf;
+
+	// On indique que l'on est au debut du buffer
+	stream->_cnt = 0;
+
+	return 0;
 }
