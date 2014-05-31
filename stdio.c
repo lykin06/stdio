@@ -274,3 +274,16 @@ int fflush(FILE *stream) {
 
 	return r;
 }
+
+int fclose(FILE *fp) {
+	int r = EOF;
+
+	r = fflush(fp);
+	free_buf(fp);
+
+	if(close(fileno(fp)) < 0) r = EOF;
+
+	free(fp);
+
+	return r;
+}
