@@ -28,7 +28,7 @@ void alloc_buf(FILE * f) {
 	// On fait poiter le premier element sur la base
 	f->_ptr = f->_base;
 
-	// On indique que l'on a un buffer vide
+	// On indique que l'on est au debut du buffer
 	f->_cnt = 0;
 }
 
@@ -206,3 +206,24 @@ int _filbuf(FILE * f) {
  	return f;
  }
 
+void setbuf(FILE *stream, char *buf) {
+	int size = sizeof(buf);
+
+	if (stream->_flag & _IOFBF) {
+		free_buf(stream);
+	}
+
+	if( (stream->_base = malloc(sizeof(size))) ) {
+		// On a un buffer
+		stream->_flag |= _IOFBF;
+		stream->_bufsiz = size;
+	} else {
+		// On n'a pas de buffer
+		stream->_flag |= _IONBF;
+	}
+	
+	stream->_base = stream->_ptr = buf;
+
+	// On indique que l'on est au debut du buffer
+	stream->_cnt = 0;
+}
