@@ -250,3 +250,27 @@ int setvbuf(FILE *stream, char *buf, int mode, int size) {;
 
 	return 0;
 }
+
+int fflush(FILE *stream) {
+	int r = 0;
+	int count;
+	int written;
+
+	if(!stream) stream = stdout;
+
+	if((stream->_flag & (_IOREAD | _IOWRT)) == _IOWRT && (count = stream->_ptr - stream->_base) > 0) {
+		written = write(fileno(stream), stream->_base, count);
+	}
+
+	if(written == count) {
+		if(stream->_flag & _IOWRT) stream->_flag &= ~_IOWRT;
+	} else {
+		stream->_flag |= _IOERR;
+		r = EOF;
+	}
+
+	stream->_ptr = stream->_base;
+	stream->_cnt = 0;
+
+	return r;
+}
