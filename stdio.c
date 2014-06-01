@@ -5,7 +5,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-struct _IOB[100] =
+FILE _IOB[100] =
 {
 	{0,NULL,NULL,0,1,0},
 	{0,NULL,NULL,0,1,1},
@@ -15,17 +15,14 @@ struct _IOB[100] =
 /*
  * Alloue un buffer au fichier
  */
-void alloc_buf(FILE * f) {
+void alloc_buf(FILE *f) {
 	if( (f->_base = malloc(BUFSIZ)) ) {
 		// On a un buffer
-		f->_flag |= _IOFBF;
 		f->_bufsiz = BUFSIZ;
-	} else {
-		// On n'a pas de buffer
-		f->_flag |= _IONBF;
+		f->_flag |= _IOMYBUF;
 	}
 
-	// On fait poiter le premier element sur la base
+	// On fait pointer le premier element sur la base
 	f->_ptr = f->_base;
 
 	// On indique que l'on est au debut du buffer
@@ -58,8 +55,8 @@ int _filbuf(FILE * f) {
 		return EOF;
 	}
 
-	// Aucun buffer aloue
-	if (f->_flag & _IONBF) {
+	// Aucun buffer alloue
+	if (!(f->_base)) {
 		alloc_buf(f);
 	} else {
 		// Sinon on place le caractere courant sur la base
@@ -69,7 +66,7 @@ int _filbuf(FILE * f) {
 	f->_cnt = read(fileno(f), f->_ptr, f->_bufsiz);
 
 	if(f->_cnt <= 0) {
-		// Soit on a une erreure de lecture, soit on est en fin de fichier
+		// Soit on a une erreur de lecture, soit on est en fin de fichier
 		f->_flag |= f->_cnt ? _IOERR : _IOEOF;
 		return EOF;
 	}
@@ -122,7 +119,7 @@ int _filbuf(FILE * f) {
  	written = count = f->_cnt = 0;
 
  	// On alloue un buffer s'il y en a pas
- 	if (f->_flag & _IONBF) {
+ 	if (!(f->_base)) {
  		alloc_buf(f);
  	}
 
